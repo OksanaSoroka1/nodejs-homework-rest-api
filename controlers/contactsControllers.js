@@ -1,8 +1,13 @@
-const { Contact} = require('../models/schema')
+const { Contact} = require('../models/contactsSchema')
 const createError = require('http-errors')
 
 const listContacts = async (req, res) => {
-   const result = await Contact.find({})
+  const { _id } = req.user;
+  const {page = 1, limit = 10} = req.query;
+    const skip = (page - 1) * limit;
+  const {favorite} = req.query
+  const result = await Contact.find({ owner: _id , favorite}, "", { skip, limit: Number(limit) }).populate("owner", "_id name email")
+  
     res.json({
         status: "success",
         code: 200,
@@ -11,6 +16,7 @@ const listContacts = async (req, res) => {
         }
     })
 }
+
 
 const getContactById = async (req, res) => {
   const { contactId } = req.params
@@ -43,8 +49,8 @@ const removeContact = async (req, res) => {
 }
 
 const addContact = async (req, res) => {
-  
-    const result = await Contact.create(req.body)
+  const { _id} = req.user
+  const result = await Contact.create({...req.body, owner: _id})
      
     res.status(201).json({
       status: "success",
@@ -89,6 +95,8 @@ const updateFavoriteContact = async (req, res) => {
       }
     })
 }
+
+
 module.exports = {
   listContacts,
   getContactById,
@@ -96,4 +104,5 @@ module.exports = {
   addContact,
     updateContact,
   updateFavoriteContact,
+  
 }

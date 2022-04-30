@@ -15,14 +15,18 @@ const contactsSchema =  Schema({
     favorite: {
       type: Boolean,
       default: false,
-    },
+  },
+     owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    }
 }, {versionKey:false, timestamps:true})
 
 const joiSchema = Joi.object({
   name: Joi.string().required(),
     email: Joi.string().email().required(),
   phone: Joi.string().required().min(10),
-     favorite: Joi.bool()
+  favorite: Joi.bool(), 
 })
 const favoriteJoiSchema = Joi.object({
   favorite: Joi.bool().required()

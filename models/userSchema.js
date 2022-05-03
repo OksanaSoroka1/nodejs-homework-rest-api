@@ -20,13 +20,18 @@ const userSchema = Schema({
     type: String,
     default: null,
   },
+  avatarURL: {
+    type: String,
+    required: true
+  },
 }, { versionKey: false, timestamps: true })
 
 const joiSchema = Joi.object({
     password: Joi.string().required(),
     email: Joi.string().required(),
     subscription: Joi.string(),
-    token: Joi.string(),
+  token: Joi.string(),
+    avatarURL: Joi.string()
 
 })
 const subscriptionSchema = Joi.object({

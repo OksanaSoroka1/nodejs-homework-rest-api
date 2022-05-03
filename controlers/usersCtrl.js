@@ -2,7 +2,11 @@ const { User} = require('../models/userSchema')
 const { Conflict, Unauthorized } = require('http-errors');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { SEKRET_KEY} = process.env
+const { SEKRET_KEY } = process.env
+const gravatar = require('gravatar')
+const fs = require('fs/promises')
+const path = require('path')
+const Jimp = require('jimp');
 
 const register = async (req,res) => { 
     const { password, email } = req.body;
@@ -11,15 +15,15 @@ const register = async (req,res) => {
         throw new Conflict(`User with such email already exist`)
     }
         const hashPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-
-   const result = User.create({ email, password: hashPassword })
+    const avatarURL = gravatar.url(email)
+   await User.create({ email, password: hashPassword , avatarURL})
 res.status(201).json({
         status: "success",
         code: 201,
         data: {
             user: {
                 email,
-              
+              avatarURL
             }
         }
     })
@@ -87,4 +91,38 @@ const changeSubscription = async (req, res) => {
       }
     })
 }
-module.exports = { register, login, getCurrentUser, logout , changeSubscription}
+
+const avatarsDir = path.join(__dirname, "../", "public", "avatars");
+const updateAvatar = async (req, res) => {
+    const { path: tempUpload, originalname } = req.file
+    const {_id: id} = req.user;
+    const imageName = `${id}_${originalname}`;
+    const resultUpload = path.join(avatarsDir, imageName)
+    
+try {   
+  await Jimp.read(tempUpload)
+      .then(image => {
+    return image
+      .resize(250, 250) 
+      .write(resultUpload);
+  })
+  .catch(err => {
+    throw err
+  });
+        /* await fs.rename(tempUpload, resultUpload); */
+        const avatarURL = path.join("public", "avatars", imageName);
+        await User.findByIdAndUpdate(req.user._id, {avatarURL});
+   
+     res.status(201).json({
+      status: "success",
+      code: 201,
+      data: {
+        avatarURL
+      }
+    })
+} catch (error) {
+    await fs.unlink(tempUpload);
+        throw error;
+}
+ }
+module.exports = { register, login, getCurrentUser, logout , changeSubscription, updateAvatar}

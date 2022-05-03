@@ -45,9 +45,8 @@ res.status(201).json({
 const login = async (req, res) => { 
      const { password, email } = req.body;
     const user = await User.findOne({ email })
-    
     if (!user || !user.verify) {
-        throw new Unauthorized(`Email  is wrong`)
+        throw new Unauthorized(`Email  is wrong or not verified`)
     }
     const comparePass = bcrypt.compareSync(password, user.password)
      if ( !comparePass) {
@@ -161,6 +160,7 @@ const repeatVerifyEmail = async (req,res) => {
     if (user.verify) {
         throw new BadRequest('Verification has already been passed')
     }
+    
  const mail = {
         to: email,
         subject: "Submit email",

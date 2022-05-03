@@ -14,6 +14,7 @@ router.get('/logout', auth, ctrlWrapper(controller.logout))
 router.get('/current', auth, ctrlWrapper(controller.getCurrentUser))
 router.patch('/', auth, validation(subscriptionSchema), ctrlWrapper(controller.changeSubscription))
 router.patch('/avatars', auth, upload.single('avatar'), ctrlWrapper(controller.updateAvatar))
-router.get("/verify/:verificationToken", ctrlWrapper(controller.verifyEmail));
 router.post('/verify', validation(verifyingEmailSchema), ctrlWrapper(controller.repeatVerifyEmail))
+router.get("/verify/:verificationToken", ctrlWrapper(controller.verifyEmail));
+
 module.exports = router
